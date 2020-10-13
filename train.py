@@ -18,31 +18,45 @@ def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
 
     for epoch in range(n_epochs):
         for input, target in train_data:
+            # backprop weight partial errors
             hidden, outputs = forward(input, w_hidden, w_out)
             partial_outs, partial_hiddens = _backprop(hidden, outputs, target, w_out)
 
             # update weights
-            # w_hidden += learn_rate * (partial_hiddens[:, None] * input)
-            # w_out += learn_rate * (partial_outs[:, None] * hidden)
-            for j in range(w_hidden.shape[0]):
-                for i in range(w_hidden.shape[1]):
-                    w_hidden[j][i] += learn_rate * partial_hiddens[j] * input[i]
+            w_hidden += learn_rate * (partial_hiddens[:, None] * input)
+            w_out += learn_rate * (partial_outs[:, None] * hidden)
 
-            for j in range(w_out.shape[0]):
-                for i in range(w_out.shape[1]):
-                    w_out[j][i] += learn_rate * partial_outs[j] * hidden[i]
+            # for j in range(w_hidden.shape[0]):
+            #     for i in range(w_hidden.shape[1]):
+            #         w_hidden[j][i] += learn_rate * partial_hiddens[j] * input[i]
+
+            # for j in range(w_out.shape[0]):
+            #     for i in range(w_out.shape[1]):
+            #         w_out[j][i] += learn_rate * partial_outs[j] * hidden[i]
 
     return w_hidden, w_out
 
 
 def forward(input, w_hidden, w_out):
-    # inputs is Nx1
-    # w_hidden is HxN
-    # w_out is KxH
+    """
+    Computes fully-connected feed-forward pass.
 
-    hidden = _sigmoid(w_hidden @ input)   # H x 1
-    outputs = _sigmoid(w_out @ hidden)    # K x 1
+    Notation:
+    N = total number of attribute values (including the bias weight)
+    H = size of hidden layer
+    K = size of output layer
 
+    INPUTS:
+    - input (ndarray): feature vector of training example (shape: (N,))
+    - w_hidden (ndarray): weight matrix for hidden layer (shape: (H, N))
+    - w_out(ndarray): weight matrix for output layer (shape: (K, N))
+
+    OUTPUTS:
+    - hidden (ndarray): node values in hidden layer (shape: (H,))
+    - outputs (ndarray): node values in output layer (shape: (K,))
+    """
+    hidden = _sigmoid(w_hidden @ input)
+    outputs = _sigmoid(w_out @ hidden)
     return hidden, outputs
 
 
@@ -57,32 +71,31 @@ def _backprop(hidden, outputs, target, w_out):
     See Mitchell 4.5.3 for derivation.
 
     INPUTS:
-    - hidden: node values in hidden layer (shape: 1 x H)
-    - outputs: node values in output layer (shape: 1 x K)
-    - target: boolean feature vector for single training example
-    - w_out: weights connecting hidden and output layer (shape: K x H)
+    - hidden: node values in hidden layer (shape: (H,))
+    - outputs: node values in output layer (shape: (K,))
+    - target: feature vector for training example (shape: (K,))
+    - w_out: weights connecting hidden and output layer (shape: (K,H))
 
     OUTPUTS:
-    - partial_outs (numpy array): partial errors for output layer
-    - partial_hiddens (numpy array): partial errors for hidden layer
+    - partial_outs (ndarray): partial errors for output layer (shape: (K,))
+    - partial_hiddens (ndarray): partial errors for hidden layer (shape: (H,))
     """
 
-    # backprop partial errors for output layer (shape: 1 x K)
+    # backprop partial errors for output layer
     partial_outs = outputs * (1 - outputs) * (target - outputs)
 
-    # backprop partial errors for hidden layer (shape: 1 x H)
-    partial_hiddens = []
-    for h in range(len(hidden)):
-        partial = hidden[h] * (1 - hidden[h])
-        s = 0
-        for k in range(len(outputs)):
-            s += partial_outs[k] * w_out[k][h]
-        partial *= s
-        partial_hiddens.append(partial)
+    # backprop partial errors for hidden layer
+    partial_hiddens = hidden * (1 - hidden) * (partial_outs @ w_out)
 
-    partial_hiddens = np.array(partial_hiddens)
-
-    # partial_hiddens = hidden * (1 - hidden) * (partial_outs @ w_out)
+    # partial_hiddens = []
+    # for h in range(len(hidden)):
+    #     partial = hidden[h] * (1 - hidden[h])
+    #     s = 0
+    #     for k in range(len(outputs)):
+    #         s += partial_outs[k] * w_out[k][h]
+    #     partial *= s
+    #     partial_hiddens.append(partial)
+    # partial_hiddens = np.array(partial_hiddens)
 
     return partial_outs, partial_hiddens
 
