@@ -91,5 +91,5 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
 if __name__ == "__main__":
     filename = parse_filename()
     data = build_data_from_arff(filename)
-    test(data, n_epochs=300)
-    # avg_acc = k_fold_cross_val(data, k=10)
+    # test(data, n_epochs=300)
+    avg_acc = k_fold_cross_val(data, k=10)

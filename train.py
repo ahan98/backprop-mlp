@@ -12,7 +12,7 @@ def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
         # set hidden layer size to aveage of input/output layer size
         n_hidden = (n_in + n_out) // 2
 
-    # initialize weights to small random values
+    # initialize weight matrices
     w_h = _init_weights(n_hidden, n_in)  # H x N
     w_out = _init_weights(n_out, n_hidden)    # K x H
 
@@ -43,23 +43,24 @@ def forward(x, w_h, b_h, w_out, b_out):
 
 def _backprop(x, w_h, b_h, w_out, b_out, target):
     h, out = forward(x, w_h, b_h, w_out, b_out)
-    dloss_dsigma = (target - out)    # K x 1
-    dsigma_dout = (out) * (1 - out)  # K x 1
 
-    dout_dwout = np.ones(len(out)).reshape(-1, 1) @ h.reshape(1, -1)  # K x H
-    dbout = dloss_dsigma * dsigma_dout  # K x 1
-    dwout = dbout * dout_dwout  # K x H
+    dsigma_out = (target - out)    # K x 1
+    dsigma_out_dout = (out) * (1 - out)  # K x 1
+    db_out = dsigma_out * dsigma_out_dout  # K x 1
 
-    dout_dsigmah = w_out  # K x H
-    dloss_dsigmah = dloss_dsigma * dsigma_dout * dout_dsigmah  # K x 1
-    dloss_dsigmah = dloss_dsigmah.sum(axis=0).reshape(-1, 1)  # H x 1
+    dout_dw_out = np.ones(len(out)).reshape(-1, 1) @ h.reshape(1, -1)  # K x H
+    dw_out = db_out * dout_dw_out  # K x H
 
+    dout_dsigma_h = w_out  # K x H
+    dsigma_h = dsigma_out * dsigma_out_dout * dout_dsigma_h  # K x 1
+    dsigma_h = dsigma_h.sum(axis=0).reshape(-1, 1)  # H x 1
     dsigmah_dh = h * (1 - h)  # H x 1
-    dh_dwh = x
-    dbh = dloss_dsigmah * dsigmah_dh  # H x 1
-    dwh = dbh @ dh_dwh.reshape(1, -1)
+    db_h = dsigma_h * dsigmah_dh  # H x 1
 
-    return dwout, dbout, dwh, dbh
+    dh_dw_h = x
+    dw_h = db_h @ dh_dw_h.reshape(1, -1)  # H x N
+
+    return dw_out, db_out, dw_h, db_h
 
 
 def _init_weights(n_rows, n_cols, std_dev=0.1):
