@@ -1,6 +1,6 @@
 import numpy as np
 from train import train, forward
-from utils import parse_filename
+from utils import parse_filename, pretty_print
 from data import build_data_from_arff
 from random import shuffle
 
@@ -40,6 +40,8 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
         print("\nUsing group {} of {} as test data".format(i+1, k))
         train_data = [x for group in groups[:i] + groups[i+1:] for x in group]
         test_data = groups[i]
+        # pretty_print(train_data)
+        # pretty_print(test_data)
 
         n_correct, n_seen, _, _ = test(train_data, test_data)
         total_correct += n_correct
@@ -94,5 +96,5 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
 if __name__ == "__main__":
     filename = parse_filename()
     data = build_data_from_arff(filename)
-    test(data, n_epochs=300)
-    # avg_acc = k_fold_cross_val(data, k=10)
+    # test(data, n_epochs=300)
+    avg_acc = k_fold_cross_val(data, k=10)

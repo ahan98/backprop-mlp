@@ -12,11 +12,11 @@ def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
         # set hidden layer size to aveage of input/output layer size
         n_hidden = (n_in + n_out) // 2
 
-    # initialize weight matrices
-    w_h = _init_weights(n_hidden, n_in)  # H x N
-    w_out = _init_weights(n_out, n_hidden)    # K x H
+    # init random weight matrices
+    w_h = _init_weights(n_hidden, n_in)     # H x N
+    w_out = _init_weights(n_out, n_hidden)  # K x H
 
-    # initialize bias vectors
+    # init random bias vectors
     b_h = _init_weights(n_hidden, 1)  # H x 1
     b_out = _init_weights(n_out, 1)   # K x 1
 
@@ -56,7 +56,7 @@ def _backprop(x, w_h, b_h, w_out, b_out, target):
     return dw_out, dout, dw_h, dh
 
 
-def _init_weights(n_rows, n_cols, std_dev=0.1):
+def _init_weights(n_rows, n_cols, std_dev=0.5):
     """
     Returns normally distributed weights (mean=0, sd=std_dev) with shape
     (n_rows, n_cols)

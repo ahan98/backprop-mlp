@@ -10,3 +10,8 @@ def parse_filename():
     parser.add_argument("data", type=str, help="path to .arff file")
     args = vars(parser.parse_args())
     return args["data"]
+
+
+def pretty_print(data):
+    for x, target in data:
+        print(x.reshape(-1), target.reshape(-1))
