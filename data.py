@@ -21,7 +21,6 @@ def build_data_from_arff(filename):
 
         stripped = re.sub(r"[\n\t\s]*", "", line)  # remove whitespace
         stripped = stripped.lower()
-        # print(stripped)
 
         # parse attribute and class names/values
         if stripped[:10] == "@attribute":

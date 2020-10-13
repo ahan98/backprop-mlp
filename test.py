@@ -1,5 +1,3 @@
-# TODO cross validation and hold-one-out
-
 import numpy as np
 from train import train, forward
 from utils import parse_filename
@@ -9,6 +7,8 @@ from random import shuffle
 
 def k_fold_cross_val(data, k=10, shuffle_data=True):
     """
+    Performs k-fold cross-validation. Returns average accuracy over all folds.
+
     INPUTS:
     - data (list): list of examples, where each example is a tuple of input and
       target feature vectors
@@ -55,6 +55,9 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
 def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
          n_epochs=500, verbose=True):
     """
+    Uses <test_data> to evaluate classification accuracy of network trained on
+    <train_data>.
+
     INPUTS:
     - train_data (list): list of train data, stored as tuples of input/target
       feature vectors
@@ -72,7 +75,7 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
     if test_data is None:
         test_data = train_data
 
-    # classify test data using trained weights
+    # classify test data using trained weights/biases
     w_h, b_h, w_out, b_out = train(train_data, n_hidden, learn_rate, n_epochs)
     n_correct = 0
     n_seen = len(test_data)
