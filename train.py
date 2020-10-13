@@ -22,12 +22,6 @@ def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
 
     for epoch in range(n_epochs):
         for x, target in train_data:
-            # TODO think about how to make shape change more efficient
-            # once everything else works, try with shape (N,) instead of (1,N)
-            # i dont think moving it into data.py makes sense
-            x = np.array(x).reshape(-1, 1)    # N x 1
-            target = np.array(target).reshape(-1, 1)  # K x 1
-
             dwout, dbout, dwh, dbh = _backprop(x, w_h, b_h, w_out, b_out, target)
             w_out += learn_rate * dwout
             b_out += learn_rate * dbout

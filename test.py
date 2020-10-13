@@ -19,10 +19,6 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
     - avg_acc (float): average test accuracy from all k folds
     """
 
-    # for d in data[:3]:
-    #     print(d)
-    # return
-
     if shuffle_data:
         shuffle(data)
 
@@ -32,11 +28,9 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
     groups = []
     size_per_group = len(data) // k
     r = len(data) % k
-    # print(len(data), k)
     start = 0
     for i in range(k):
         n_examples = size_per_group + (i < r)
-        # print(start, start + n_examples)
         groups.append(data[start: start + n_examples])
         start += n_examples
 
@@ -47,12 +41,7 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
         train_data = [data for group in groups[:i] + groups[i+1:] for data in group]
         test_data = groups[i]
 
-        # for d in train_data:
-        #     print(d)
-        # print(test_data)
-
         n_correct, n_total, _, _ = test(train_data, test_data)
-
         cumulative_correct += n_correct
         cumulative_total += n_total
 
@@ -82,18 +71,15 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
     # test data re-uses train data, if unspecified
     if test_data is None:
         test_data = train_data
-        # for d in train_data: print(d)
 
     # classify test data using trained weights
     w_h, b_h, w_out, b_out = train(train_data, n_hidden, learn_rate, n_epochs)
     n_correct = 0
     n_total = len(test_data)
     for input, target in test_data:
-        input = np.array(input).reshape(-1,1)
         _, out = forward(input, w_h, b_h, w_out, b_out)
-        # print(out.shape)
         predicted_class_val = np.argmax(out)
-        n_correct += target[predicted_class_val]
+        n_correct += target[predicted_class_val][0]
 
     if verbose:
         print("Percent classified correctly: {:.2f}% ({}:{})"
