@@ -2,6 +2,7 @@
 
 import re
 from utils import parse_filename
+import numpy as np
 
 
 def build_data_from_arff(filename):
@@ -48,25 +49,12 @@ def build_data_from_arff(filename):
                 else:
                     idx = attr_val_to_index[i][val]
                     bools[idx] = 1
-            attr_bools, class_bools = bools[:-n_class_vals], bools[-n_class_vals:]
-            data.append((attr_bools, class_bools))
+
+            input = np.array(bools[:-n_class_vals] + [1])
+            target = np.array(bools[-n_class_vals:])
+            data.append((input, target))
 
     return data
-
-
-def update_table(table, cumulative, instance, index_to_name, remove):
-    class_val = instance[-1]
-    sign = -1 if remove else 1  # add or subtract frequencies
-    for i, attr_val in enumerate(instance):
-        if attr_val == "?":
-            continue
-        name = index_to_name[i]
-        if i == len(instance) - 1:
-            table[name][class_val] += sign * 1
-            table["TOTAL"] += sign * 1
-        else:
-            table[name][attr_val][class_val] += sign * 1
-            cumulative[name][class_val] += sign * 1
 
 
 if __name__ == "__main__":
