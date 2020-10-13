@@ -8,8 +8,8 @@ from data import build_data_from_arff
 def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
     n_in, n_out = len(train_data[0][0]), len(train_data[0][1])
 
-    # default: set size of hidden layer to average of input and output layer
     if n_hidden is None:
+        # set hidden layer size to aveage of input/output layer size
         n_hidden = (n_in + n_out) // 2
 
     # initialize weights to small random values
@@ -29,7 +29,6 @@ def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
             # for j in range(w_hidden.shape[0]):
             #     for i in range(w_hidden.shape[1]):
             #         w_hidden[j][i] += learn_rate * partial_hiddens[j] * input[i]
-
             # for j in range(w_out.shape[0]):
             #     for i in range(w_out.shape[1]):
             #         w_out[j][i] += learn_rate * partial_outs[j] * hidden[i]

@@ -19,6 +19,10 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
     - avg_acc (float): average test accuracy from all k folds
     """
 
+    # for d in data[:3]:
+    #     print(d)
+    # return
+
     if shuffle_data:
         shuffle(data)
 
@@ -28,8 +32,13 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
     groups = []
     size_per_group = len(data) // k
     r = len(data) % k
+    # print(len(data), k)
+    start = 0
     for i in range(k):
-        groups.append(data[i: (i + size_per_group + (i < r))])
+        n_examples = size_per_group + (i < r)
+        # print(start, start + n_examples)
+        groups.append(data[start: start + n_examples])
+        start += n_examples
 
     # cross validation each fold
     cumulative_correct = cumulative_total = 0
@@ -37,6 +46,11 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
         print("\nUsing group {} of {} as test data".format(i+1, k))
         train_data = [data for group in groups[:i] + groups[i+1:] for data in group]
         test_data = groups[i]
+
+        # for d in train_data:
+        #     print(d)
+        # print(test_data)
+
         n_correct, n_total, _, _ = test(train_data, test_data)
 
         cumulative_correct += n_correct
@@ -68,6 +82,7 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
     # test data re-uses train data, if unspecified
     if test_data is None:
         test_data = train_data
+        # for d in train_data: print(d)
 
     # classify test data using trained weights
     w_hidden, w_out = train(train_data, n_hidden, learn_rate, n_epochs)
@@ -88,5 +103,5 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
 if __name__ == "__main__":
     filename = parse_filename()
     data = build_data_from_arff(filename)
-    # test(data)
-    avg_acc = k_fold_cross_val(data, k=10)
+    test(data)
+    # avg_acc = k_fold_cross_val(data, k=10)
