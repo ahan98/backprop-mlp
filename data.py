@@ -50,8 +50,8 @@ def build_data_from_arff(filename):
                     idx = attr_val_to_index[i][val]
                     bools[idx] = 1
 
-            input = np.array(bools[:-n_class_vals] + [1])
-            target = np.array(bools[-n_class_vals:])
+            input = bools[:-n_class_vals]
+            target = bools[-n_class_vals:]
             data.append((input, target))
 
     return data

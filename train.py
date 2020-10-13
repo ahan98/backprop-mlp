@@ -13,73 +13,59 @@ def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
         n_hidden = (n_in + n_out) // 2
 
     # initialize weights to small random values
-    w_hidden = _init_weights(n_hidden, n_in)
-    w_out = _init_weights(n_out, n_hidden)
+    w_h = _init_weights(n_hidden, n_in)  # H x N
+    w_out = _init_weights(n_out, n_hidden)    # K x H
+
+    # initialize bias vectors
+    b_h = _init_weights(n_hidden, 1)  # H x 1
+    b_out = _init_weights(n_out, 1)   # K x 1
 
     for epoch in range(n_epochs):
-        for input, target in train_data:
-            # backprop weight partial errors
-            hidden, outputs = forward(input, w_hidden, w_out)
-            partial_outs, partial_hiddens = _backprop(hidden, outputs, target, w_out)
+        for x, target in train_data:
+            # TODO think about how to make shape change more efficient
+            # once everything else works, try with shape (N,) instead of (1,N)
+            # i dont think moving it into data.py makes sense
+            x = np.array(x).reshape(-1, 1)    # N x 1
+            target = np.array(target).reshape(-1, 1)  # K x 1
 
-            # update weights
-            w_hidden += learn_rate * (partial_hiddens[:, None] * input)
-            w_out += learn_rate * (partial_outs[:, None] * hidden)
+            dwout, dbout, dwh, dbh = _backprop(x, w_h, b_h, w_out, b_out, target)
+            w_out += learn_rate * dwout
+            b_out += learn_rate * dbout
 
-    return w_hidden, w_out
+            w_h += learn_rate * dwh
+            b_h += learn_rate * dbh
+
+    return w_h, b_h, w_out, b_out
 
 
-def forward(input, w_hidden, w_out):
-    """
-    Computes fully-connected feed-forward pass.
-
-    Notation:
-    N = total number of attribute values (including the bias weight)
-    H = size of hidden layer
-    K = size of output layer
-
-    INPUTS:
-    - input (ndarray): feature vector of training example (shape: (N,))
-    - w_hidden (ndarray): weight matrix for hidden layer (shape: (H, N))
-    - w_out(ndarray): weight matrix for output layer (shape: (K, N))
-
-    OUTPUTS:
-    - hidden (ndarray): node values in hidden layer (shape: (H,))
-    - outputs (ndarray): node values in output layer (shape: (K,))
-    """
-    hidden = _sigmoid(w_hidden @ input)
-    outputs = _sigmoid(w_out @ hidden)
-    return hidden, outputs
+def forward(x, w_h, b_h, w_out, b_out):
+    h = _sigmoid(w_h @ x + b_h)      # (H x N) x (N x 1) = H x 1
+    out = _sigmoid(w_out @ h + b_out)  # (K x H) x (H x 1) = K x 1
+    return h, out
 
 
 """ PRIVATE METHODS """
 
 
-def _backprop(hidden, outputs, target, w_out):
-    """
-    Returns partial errors for hidden and output layer, via backpropagation
-    rule. Assumes sigmoid activation follows both layers.
+def _backprop(x, w_h, b_h, w_out, b_out, target):
+    h, out = forward(x, w_h, b_h, w_out, b_out)
+    dloss_dsigma = (target - out)    # K x 1
+    dsigma_dout = (out) * (1 - out)  # K x 1
 
-    See Mitchell 4.5.3 for derivation.
+    dout_dwout = np.ones(len(out)).reshape(-1, 1) @ h.reshape(1, -1)  # K x H
+    dbout = dloss_dsigma * dsigma_dout  # K x 1
+    dwout = dbout * dout_dwout  # K x H
 
-    INPUTS:
-    - hidden: node values in hidden layer (shape: (H,))
-    - outputs: node values in output layer (shape: (K,))
-    - target: feature vector for training example (shape: (K,))
-    - w_out: weights connecting hidden and output layer (shape: (K,H))
+    dout_dsigmah = w_out  # K x H
+    dloss_dsigmah = dloss_dsigma * dsigma_dout * dout_dsigmah  # K x 1
+    dloss_dsigmah = dloss_dsigmah.sum(axis=0).reshape(-1, 1)  # H x 1
 
-    OUTPUTS:
-    - partial_outs (ndarray): partial errors for output layer (shape: (K,))
-    - partial_hiddens (ndarray): partial errors for hidden layer (shape: (H,))
-    """
+    dsigmah_dh = h * (1 - h)  # H x 1
+    dh_dwh = x
+    dbh = dloss_dsigmah * dsigmah_dh  # H x 1
+    dwh = dbh @ dh_dwh.reshape(1, -1)
 
-    # backprop partial errors for output layer
-    partial_outs = outputs * (1 - outputs) * (target - outputs)
-
-    # backprop partial errors for hidden layer
-    partial_hiddens = hidden * (1 - hidden) * (partial_outs @ w_out)
-
-    return partial_outs, partial_hiddens
+    return dwout, dbout, dwh, dbh
 
 
 def _init_weights(n_rows, n_cols, std_dev=0.1):
@@ -103,8 +89,3 @@ if __name__ == "__main__":
     data = build_data_from_arff(filename)
     for d in data:
         print(d)
-
-    w_hidden, w_out = _backprop(data, 3, n_epochs=2)
-    print("****")
-    print(w_hidden)
-    print(w_out)

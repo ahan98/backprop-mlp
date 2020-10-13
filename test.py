@@ -85,11 +85,13 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
         # for d in train_data: print(d)
 
     # classify test data using trained weights
-    w_hidden, w_out = train(train_data, n_hidden, learn_rate, n_epochs)
+    w_h, b_h, w_out, b_out = train(train_data, n_hidden, learn_rate, n_epochs)
     n_correct = 0
     n_total = len(test_data)
     for input, target in test_data:
-        _, out = forward(input, w_hidden, w_out)
+        input = np.array(input).reshape(-1,1)
+        _, out = forward(input, w_h, b_h, w_out, b_out)
+        # print(out.shape)
         predicted_class_val = np.argmax(out)
         n_correct += target[predicted_class_val]
 
@@ -97,11 +99,11 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
         print("Percent classified correctly: {:.2f}% ({}:{})"
               .format(100 * n_correct / n_total, n_correct, n_total - n_correct))
 
-    return n_correct, n_total, w_hidden, w_out
+    return n_correct, n_total, w_h, w_out
 
 
 if __name__ == "__main__":
     filename = parse_filename()
     data = build_data_from_arff(filename)
-    test(data)
+    test(data, n_epochs=300)
     # avg_acc = k_fold_cross_val(data, k=10)
