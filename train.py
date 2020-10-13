@@ -26,13 +26,6 @@ def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
             w_hidden += learn_rate * (partial_hiddens[:, None] * input)
             w_out += learn_rate * (partial_outs[:, None] * hidden)
 
-            # for j in range(w_hidden.shape[0]):
-            #     for i in range(w_hidden.shape[1]):
-            #         w_hidden[j][i] += learn_rate * partial_hiddens[j] * input[i]
-            # for j in range(w_out.shape[0]):
-            #     for i in range(w_out.shape[1]):
-            #         w_out[j][i] += learn_rate * partial_outs[j] * hidden[i]
-
     return w_hidden, w_out
 
 
@@ -85,16 +78,6 @@ def _backprop(hidden, outputs, target, w_out):
 
     # backprop partial errors for hidden layer
     partial_hiddens = hidden * (1 - hidden) * (partial_outs @ w_out)
-
-    # partial_hiddens = []
-    # for h in range(len(hidden)):
-    #     partial = hidden[h] * (1 - hidden[h])
-    #     s = 0
-    #     for k in range(len(outputs)):
-    #         s += partial_outs[k] * w_out[k][h]
-    #     partial *= s
-    #     partial_hiddens.append(partial)
-    # partial_hiddens = np.array(partial_hiddens)
 
     return partial_outs, partial_hiddens
 
