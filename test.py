@@ -35,19 +35,19 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
         start += n_examples
 
     # cross validation each fold
-    cumulative_correct = cumulative_total = 0
+    total_correct = total_seen = 0
     for i in range(k):
         print("\nUsing group {} of {} as test data".format(i+1, k))
-        train_data = [data for group in groups[:i] + groups[i+1:] for data in group]
+        train_data = [x for group in groups[:i] + groups[i+1:] for x in group]
         test_data = groups[i]
 
-        n_correct, n_total, _, _ = test(train_data, test_data)
-        cumulative_correct += n_correct
-        cumulative_total += n_total
+        n_correct, n_seen, _, _ = test(train_data, test_data)
+        total_correct += n_correct
+        total_seen += n_seen
 
-    avg_acc = 100 * cumulative_correct / cumulative_total
+    avg_acc = 100 * total_correct / total_seen
     print("Average accuracy: {:.2f}% ({}:{})"
-          .format(avg_acc, cumulative_correct, cumulative_total - cumulative_correct))
+          .format(avg_acc, total_correct, total_seen - total_correct))
 
     return avg_acc
 
@@ -75,7 +75,7 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
     # classify test data using trained weights
     w_h, b_h, w_out, b_out = train(train_data, n_hidden, learn_rate, n_epochs)
     n_correct = 0
-    n_total = len(test_data)
+    n_seen = len(test_data)
     for x, target in test_data:
         _, out = forward(x, w_h, b_h, w_out, b_out)
         predicted_class_val = np.argmax(out)
@@ -83,9 +83,9 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
 
     if verbose:
         print("Percent classified correctly: {:.2f}% ({}:{})"
-              .format(100 * n_correct / n_total, n_correct, n_total - n_correct))
+              .format(100 * n_correct / n_seen, n_correct, n_seen - n_correct))
 
-    return n_correct, n_total, w_h, w_out
+    return n_correct, n_seen, w_h, w_out
 
 
 if __name__ == "__main__":
