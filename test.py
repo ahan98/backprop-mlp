@@ -76,8 +76,8 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
     w_h, b_h, w_out, b_out = train(train_data, n_hidden, learn_rate, n_epochs)
     n_correct = 0
     n_total = len(test_data)
-    for input, target in test_data:
-        _, out = forward(input, w_h, b_h, w_out, b_out)
+    for x, target in test_data:
+        _, out = forward(x, w_h, b_h, w_out, b_out)
         predicted_class_val = np.argmax(out)
         n_correct += target[predicted_class_val][0]
 
