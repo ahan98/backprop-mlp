@@ -5,7 +5,9 @@ from data import build_data_from_arff
 from random import shuffle
 
 
-def k_fold_cross_val(data, k=10, shuffle_data=True):
+def k_fold_cross_val(data, k=10, shuffle_data=True, n_hidden=None,
+                     learn_rate=0.1, n_epochs=500, verbose=True):
+
     """
     Performs k-fold cross-validation. Returns average accuracy over all folds.
 
@@ -43,7 +45,7 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
         # pretty_print(train_data)
         # pretty_print(test_data)
 
-        n_correct, n_seen, _, _ = test(train_data, test_data)
+        n_correct, n_seen, _, _ = test(train_data, test_data, n_hidden=n_hidden)
         total_correct += n_correct
         total_seen += n_seen
 
@@ -78,11 +80,17 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
         test_data = train_data
 
     # classify test data using trained weights/biases
-    w_h, b_h, w_out, b_out = train(train_data, n_hidden, learn_rate, n_epochs)
+    weights_biases = train(train_data, n_hidden, learn_rate, n_epochs)
+    if n_hidden == 0:
+        w_out, b_out = weights_biases
+        w_h = b_h = None
+    else:
+        w_out, b_out, w_h, b_h = weights_biases
+
     n_correct = 0
     n_seen = len(test_data)
     for x, target in test_data:
-        _, sigma_out = forward(x, w_h, b_h, w_out, b_out)
+        _, sigma_out = forward(x, w_out, b_out, w_h, b_h)
         pred = np.argmax(sigma_out)
         n_correct += target[pred][0]
 
@@ -97,4 +105,4 @@ if __name__ == "__main__":
     filename = parse_filename()
     data = build_data_from_arff(filename)
     # test(data, n_epochs=300)
-    avg_acc = k_fold_cross_val(data, k=10)
+    avg_acc = k_fold_cross_val(data, k=10, n_hidden=0)

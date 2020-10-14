@@ -1,6 +1,6 @@
 import re
 import numpy as np
-from utils import parse_arff_file
+from utils import parse_filename
 
 
 def build_data_from_arff(arff_file):
@@ -75,7 +75,7 @@ def build_data_from_arff(arff_file):
 
 
 if __name__ == "__main__":
-    arff_file = parse_arff_file()
+    arff_file = parse_filename()
     data = build_data_from_arff(arff_file)
     for d in data:
         print(d)
