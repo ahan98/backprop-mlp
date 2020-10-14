@@ -51,7 +51,7 @@ def train(train_data, n_hidden="a", learn_rate=0.1, n_epochs=500):
                 w_h += learn_rate * gradients[2]
                 b_h += learn_rate * gradients[3]
 
-    return (w_h, b_h, w_out, b_out) if (w_h is not None) else (w_out, b_out)
+    return (w_out, b_out, w_h, b_h) if (w_h is not None) else (w_out, b_out)
 
 
 def forward(x, w_out, b_out, w_h=None, b_h=None):
