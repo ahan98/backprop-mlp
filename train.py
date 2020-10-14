@@ -22,15 +22,15 @@ def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
 
     for epoch in range(n_epochs):
         for x, target in train_data:
-            dw_out, dout, dw_h, dh = _backprop(x, w_h, b_h, w_out, b_out, target)
+            dw_out, db_out, dw_h, db_h = _backprop(x, w_h, b_h, w_out, b_out, target)
 
             # update output layer weights/biases
             w_out += learn_rate * dw_out
-            b_out += learn_rate * dout
+            b_out += learn_rate * db_out
 
             # update hidden layer weights/biases
             w_h += learn_rate * dw_h
-            b_h += learn_rate * dh
+            b_h += learn_rate * db_h
 
     return w_h, b_h, w_out, b_out
 
@@ -47,13 +47,26 @@ def forward(x, w_h, b_h, w_out, b_out):
 def _backprop(x, w_h, b_h, w_out, b_out, target):
     h, out = forward(x, w_h, b_h, w_out, b_out)
 
-    dout = out * (1 - out) * (target - out)             # K x 1
-    dw_out = dout * h.reshape(1, -1)                    # K x H
-    dnet_k = (dout * w_out).sum(axis=0).reshape(-1, 1)  # H x 1
-    dh = h * (1 - h) * dnet_k                           # H x 1
-    dw_h = dh @ x.reshape(1, -1)                        # H x N
+    # ∂L/∂b_out = ∂L/∂sigma_out * ∂sigma_out/∂out * ∂out/∂w_out
+    # Notice ∂out/∂w_out is just the one vector since coefficient of b_h
+    # in w_h @ x + b_h is 1.
+    # Therefore, ∂L/∂b_out = ∂L/∂sigma_out * ∂sigma_out/∂out = ∂L/∂out
+    db_out = (target - out) * out * (1 - out)   # K x 1
 
-    return dw_out, dout, dw_h, dh
+    # ∂L/∂w_out = ∂L/∂out * ∂out/∂w_out
+    dw_out = db_out @ h.reshape(1, -1)          # K x H
+
+    # ∂L/∂sigma_h = ∂L/∂out * ∂out/∂sigma_h
+    dsigma_h = np.transpose(w_out) @ db_out     # H x 1
+
+    # ∂L/∂h = ∂L/∂sigma_h * ∂sigma_h/∂h
+    # Similar to ∂L/∂b_out, ∂h/∂b_h is the one vector, so ∂L/∂h = ∂L/∂b_h.
+    db_h = dsigma_h * h * (1 - h)               # H x 1
+
+    # ∂L/∂w_h = ∂L/∂h * ∂h/∂w_h
+    dw_h = db_h @ np.transpose(x)               # H x N
+
+    return dw_out, db_out, dw_h, db_h
 
 
 def _init_weights(n_rows, n_cols, std_dev=0.5):
