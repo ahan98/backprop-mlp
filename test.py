@@ -80,13 +80,7 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
         test_data = train_data
 
     # classify test data using trained weights/biases
-    weights_biases = train(train_data, n_hidden, learn_rate, n_epochs)
-    if n_hidden == 0:
-        w_out, b_out = weights_biases
-        w_h = b_h = None
-    else:
-        w_out, b_out, w_h, b_h = weights_biases
-
+    w_out, b_out, w_h, b_h = train(train_data, n_hidden, learn_rate, n_epochs)
     n_correct, n_data = 0, len(test_data)
     for x, target in test_data:
         _, sigma_out = forward(x, w_out, b_out, w_h, b_h)
@@ -97,7 +91,7 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
         print("Percent classified correctly: {:.2f}% ({}:{})"
               .format(100 * n_correct / n_data, n_correct, n_data - n_correct))
 
-    return n_correct, n_data, weights_biases
+    return n_correct, n_data, (w_out, b_out, w_h, b_h)
 
 
 if __name__ == "__main__":
