@@ -85,18 +85,18 @@ def _backprop(x, w_h, b_h, w_out, b_out, target):
     db_out = (target - sigma_out) * sigma_out * (1 - sigma_out)  # K x 1
 
     # ∂L/∂w_out = ∂L/∂out * ∂out/∂w_out
-    dw_out = db_out @ sigma_h.reshape(1, -1)  # K x H
+    dw_out = db_out @ sigma_h.reshape(1, -1)    # K x H
 
     # ∂L/∂sigma_h = ∂L/∂out * ∂out/∂sigma_h
     # Note: Mitchell refers to this partial as ∂net_k.
-    dsigma_h = np.transpose(w_out) @ db_out  # H x 1
+    dsigma_h = np.transpose(w_out) @ db_out     # H x 1
 
     # ∂L/∂h = ∂L/∂sigma_h * ∂sigma_h/∂h
     # Similar to ∂L/∂b_out, ∂h/∂b_h is the one vector, so ∂L/∂b_h = ∂L/∂h.
-    db_h = dsigma_h * sigma_h * (1 - sigma_h)  # H x 1
+    db_h = dsigma_h * sigma_h * (1 - sigma_h)   # H x 1
 
     # ∂L/∂w_h = ∂L/∂h * ∂h/∂w_h
-    dw_h = db_h @ np.transpose(x)  # H x N
+    dw_h = db_h @ np.transpose(x)               # H x N
 
     return dw_out, db_out, dw_h, db_h
 
