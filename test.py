@@ -22,9 +22,9 @@ def k_fold_cross_val(data, k=10, shuffle_data=True):
     if shuffle_data:
         shuffle(data)
 
-    # create folds s.t. fold sizes differ by at most 1
-    # first, each fold has N = floor(len(data) / k) elements
-    # the first r = len(data) % k folds have N + 1 elements
+    # Group examples s.t. fold sizes differ by at most 1.
+    # Assign [N = floor(len(data) / k)] examples to each fold.
+    # Assign one additional example to [r = len(data) % k] folds.
     groups = []
     size_per_group = len(data) // k
     r = len(data) % k
@@ -82,9 +82,9 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
     n_correct = 0
     n_seen = len(test_data)
     for x, target in test_data:
-        _, out = forward(x, w_h, b_h, w_out, b_out)
-        predicted_class_val = np.argmax(out)
-        n_correct += target[predicted_class_val][0]
+        _, sigma_out = forward(x, w_h, b_h, w_out, b_out)
+        pred = np.argmax(sigma_out)
+        n_correct += target[pred][0]
 
     if verbose:
         print("Percent classified correctly: {:.2f}% ({}:{})"
