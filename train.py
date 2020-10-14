@@ -1,5 +1,3 @@
-# TODO comments
-
 import numpy as np
 from utils import parse_filename
 from data import build_data_from_arff
@@ -36,35 +34,69 @@ def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
 
 
 def forward(x, w_h, b_h, w_out, b_out):
-    h = _sigmoid(w_h @ x + b_h)         # (H x N) x (N x 1) = H x 1
-    out = _sigmoid(w_out @ h + b_out)   # (K x H) x (H x 1) = K x 1
-    return h, out
+    """
+    Performs one forward pass through the network. Returns sigmoid activated
+    outputs for hidden and output layer.
+
+    INPUTS:
+    - x (ndarray): input feature vector (shape: H x 1)
+    - w_h (ndarray): hidden layer weights (shape: H x N)
+    - b_h (ndarray): hidden layer biases (shape: H x 1)
+    - w_out (ndarray): output layer weights (shape: K x H)
+    - b_out (ndarray): output layer biases (shape: K x 1)
+
+    OUTPUTS:
+    - sigma_h, sigma_out: respective outputs for hidden/output layers
+    """
+
+    h = w_h @ x + b_h
+    sigma_h = _sigmoid(h)           # H x 1
+    out = w_out @ sigma_h + b_out
+    sigma_out = _sigmoid(out)       # K x 1
+    return sigma_h, sigma_out
 
 
 """ PRIVATE METHODS """
 
 
 def _backprop(x, w_h, b_h, w_out, b_out, target):
-    h, out = forward(x, w_h, b_h, w_out, b_out)
+    """
+    Performs one forward pass through the network. Uses network outputs to
+    compute gradients for each layers' weights/biases.
+
+    INPUTS:
+    - x (ndarray): input feature vector (shape: H x 1)
+    - w_h (ndarray): hidden layer weights (shape: H x N)
+    - b_h (ndarray): hidden layer biases (shape: H x 1)
+    - w_out (ndarray): output layer weights (shape: K x H)
+    - b_out (ndarray): output layer biases (shape: K x 1)
+    - target (ndarray): ground truth labels for x
+
+    OUTPUT:
+    - dw_out, db_out, dw_h, db_h: gradients of the weights/biases
+    """
+
+    sigma_h, sigma_out = forward(x, w_h, b_h, w_out, b_out)
 
     # ∂L/∂b_out = ∂L/∂sigma_out * ∂sigma_out/∂out * ∂out/∂w_out
     # Notice ∂out/∂w_out is just the one vector since coefficient of b_h
     # in w_h @ x + b_h is 1.
     # Therefore, ∂L/∂b_out = ∂L/∂sigma_out * ∂sigma_out/∂out = ∂L/∂out
-    db_out = (target - out) * out * (1 - out)   # K x 1
+    db_out = (target - sigma_out) * sigma_out * (1 - sigma_out)  # K x 1
 
     # ∂L/∂w_out = ∂L/∂out * ∂out/∂w_out
-    dw_out = db_out @ h.reshape(1, -1)          # K x H
+    dw_out = db_out @ sigma_h.reshape(1, -1)  # K x H
 
     # ∂L/∂sigma_h = ∂L/∂out * ∂out/∂sigma_h
-    dsigma_h = np.transpose(w_out) @ db_out     # H x 1
+    # Note: Mitchell refers to this partial as ∂net_k.
+    dsigma_h = np.transpose(w_out) @ db_out  # H x 1
 
     # ∂L/∂h = ∂L/∂sigma_h * ∂sigma_h/∂h
-    # Similar to ∂L/∂b_out, ∂h/∂b_h is the one vector, so ∂L/∂h = ∂L/∂b_h.
-    db_h = dsigma_h * h * (1 - h)               # H x 1
+    # Similar to ∂L/∂b_out, ∂h/∂b_h is the one vector, so ∂L/∂b_h = ∂L/∂h.
+    db_h = dsigma_h * sigma_h * (1 - sigma_h)  # H x 1
 
     # ∂L/∂w_h = ∂L/∂h * ∂h/∂w_h
-    dw_h = db_h @ np.transpose(x)               # H x N
+    dw_h = db_h @ np.transpose(x)  # H x N
 
     return dw_out, db_out, dw_h, db_h
 
