@@ -37,7 +37,7 @@ def k_fold_cross_val(data, k=10, shuffle_data=True, n_hidden=None,
         start += n_examples
 
     # cross validation each fold
-    total_correct = total_seen = 0
+    total_correct = total_data = 0
     for i in range(k):
         print("\nUsing group {} of {} as test data".format(i+1, k))
         train_data = [x for group in groups[:i] + groups[i+1:] for x in group]
@@ -45,13 +45,13 @@ def k_fold_cross_val(data, k=10, shuffle_data=True, n_hidden=None,
         # pretty_print(train_data)
         # pretty_print(test_data)
 
-        n_correct, n_seen, _, _ = test(train_data, test_data, n_hidden=n_hidden)
+        n_correct, n_data, _ = test(train_data, test_data, n_hidden=n_hidden)
         total_correct += n_correct
-        total_seen += n_seen
+        total_data += n_data
 
-    avg_acc = 100 * total_correct / total_seen
+    avg_acc = 100 * total_correct / total_data
     print("Average accuracy: {:.2f}% ({}:{})"
-          .format(avg_acc, total_correct, total_seen - total_correct))
+          .format(avg_acc, total_correct, total_data - total_correct))
 
     return avg_acc
 
@@ -72,7 +72,7 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
     - verbose (bool): prints test accuracy if True
 
     OUTPUTS:
-    - returns test accuracy and trained weights
+    - returns test accuracy and trained weights/biases
     """
 
     # test data re-uses train data, if unspecified
@@ -87,8 +87,7 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
     else:
         w_out, b_out, w_h, b_h = weights_biases
 
-    n_correct = 0
-    n_seen = len(test_data)
+    n_correct, n_data = 0, len(test_data)
     for x, target in test_data:
         _, sigma_out = forward(x, w_out, b_out, w_h, b_h)
         pred = np.argmax(sigma_out)
@@ -96,9 +95,9 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
 
     if verbose:
         print("Percent classified correctly: {:.2f}% ({}:{})"
-              .format(100 * n_correct / n_seen, n_correct, n_seen - n_correct))
+              .format(100 * n_correct / n_data, n_correct, n_data - n_correct))
 
-    return n_correct, n_seen, w_h, w_out
+    return n_correct, n_data, weights_biases
 
 
 if __name__ == "__main__":
