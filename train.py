@@ -1,9 +1,23 @@
+# TODO handle zero hidden layers
+
 import numpy as np
 from utils import parse_filename
 from data import build_data_from_arff
 
 
 def train(train_data, n_hidden=None, learn_rate=0.1, n_epochs=500):
+    """
+    Trains network weights/biases on <train_data> using stochastic gradient
+    descent and backpropagation.
+
+    INPUTS:
+    - train_data (list): each example is a tuple (x, t) denoting input/target
+      feature vectors, respectively
+    - n_hidden (int): num. of nodes in hidden layer
+    - learn_rate (int): step size for gradient update
+    - n_epochs (int): num. of times each example in <train_data> is used once
+    """
+
     n_in, n_out = len(train_data[0][0]), len(train_data[0][1])
 
     if n_hidden is None:
