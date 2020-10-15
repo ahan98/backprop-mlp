@@ -14,7 +14,7 @@ file:
 
 For this example, `-L 0.3` specifies a learning rate of 0.3, `-E 300` specifies
 training for 300 epochs, `-K 10` specifies 10-fold cross validation, and `-H 5`
-specifies the number of units in the hidden layer to be 5.
+specifies 5 units in the hidden layer.
 
 Running `python3 test.py -h` will also display the default values for these
 parameters.
