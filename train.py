@@ -1,6 +1,4 @@
 import numpy as np
-from utils import parse_filename
-from data import build_data_from_arff
 
 
 def train(train_data, n_hidden="a", learn_rate=0.1, n_epochs=500):
@@ -13,7 +11,7 @@ def train(train_data, n_hidden="a", learn_rate=0.1, n_epochs=500):
     INPUTS:
     - train_data (list): each example is a tuple (x, t) denoting input/target
       feature vectors, respectively
-    - n_hidden (int/str): num. of nodes in hidden layer
+    - n_hidden (str): num. of nodes in hidden layer
         NOTE: just like Weka, we assume the default wildcard value "a", i.e.,
         average of input and output layer size
     - learn_rate (float): step size for gradient update
@@ -28,6 +26,10 @@ def train(train_data, n_hidden="a", learn_rate=0.1, n_epochs=500):
     n_in, n_out = len(train_data[0][0]), len(train_data[0][1])
     if n_hidden == "a":
         n_hidden = (n_in + n_out) // 2  # average of input/output size
+    elif n_hidden.isdigit():
+        n_hidden = int(n_hidden)
+    else:
+        raise ValueError("Invalid hidden layer size {}".format(n_hidden))
 
     # init hidden layer
     w_h = None
@@ -149,10 +151,3 @@ def _sigmoid(x):
     Returns sigmoid output given number or array-like of numbers.
     """
     return 1 / (1 + np.exp(-x))
-
-
-if __name__ == "__main__":
-    filename = parse_filename()
-    data = build_data_from_arff(filename)
-    for d in data:
-        print(d)

@@ -1,6 +1,5 @@
 import re
 import numpy as np
-from utils import parse_filename
 
 
 def build_data_from_arff(arff_file):
@@ -20,6 +19,7 @@ def build_data_from_arff(arff_file):
 
     lines = None
     with open(arff_file, "r") as f:
+        print("\nGetting data from {}...".format(arff_file))
         lines = [line for line in f.readlines() if line.strip()]
 
     n_attr_vals = 0   # total num. attribute values
@@ -71,11 +71,6 @@ def build_data_from_arff(arff_file):
             target = np.array(attrs[-n_class_vals:]).reshape(-1, 1)
             data.append((x, target))
 
+    if data:
+        print("Successfully parsed data")
     return data
-
-
-if __name__ == "__main__":
-    arff_file = parse_filename()
-    data = build_data_from_arff(arff_file)
-    for d in data:
-        print(d)

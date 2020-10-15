@@ -1,12 +1,12 @@
 import numpy as np
 from train import train, forward
-from utils import parse_filename, pretty_print
+from utils import parse_filename, pretty_print, print_model_params
 from data import build_data_from_arff
 from random import shuffle
 
 
-def k_fold_cross_val(data, k=10, shuffle_data=True, n_hidden=None,
-                     learn_rate=0.1, n_epochs=500, verbose=True):
+def k_fold_cross_val(data, k=10, n_hidden=None, learn_rate=0.1, n_epochs=500,
+                     verbose=True, shuffle_data=True):
 
     """
     Performs k-fold cross-validation. Returns average accuracy over all folds.
@@ -14,8 +14,11 @@ def k_fold_cross_val(data, k=10, shuffle_data=True, n_hidden=None,
     INPUTS:
     - data (list): list of examples, where each example is a tuple of input and
       target feature vectors
-    - k (int): number of cross-validation folds
-    - shuffle_data (bool): shuffles data in place if True
+    - n_hidden (int): size of hidden layer
+    - learn_rate (float): learning rate for grad. descent
+    - n_epochs (int): total iterations over all train data
+    - verbose (bool): prints test accuracy if True
+    - shuffle_data (bool): shuffles data in-place if True
 
     OUTPUTS:
     - avg_acc (float): average test accuracy from all k folds
@@ -50,7 +53,7 @@ def k_fold_cross_val(data, k=10, shuffle_data=True, n_hidden=None,
         total_data += n_data
 
     avg_acc = 100 * total_correct / total_data
-    print("Average accuracy: {:.2f}% ({}:{})"
+    print("\nAverage accuracy: {:.2f}% ({}:{})"
           .format(avg_acc, total_correct, total_data - total_correct))
 
     return avg_acc
@@ -95,7 +98,21 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
 
 
 if __name__ == "__main__":
-    filename = parse_filename()
-    data = build_data_from_arff(filename)
-    # test(data, n_epochs=300)
-    avg_acc = k_fold_cross_val(data, k=10, n_hidden=0)
+    args = parse_filename()
+    data_file = args["data"]
+    data = build_data_from_arff(data_file)
+
+    n_hidden = args["hidden"]
+    n_epochs = args["epochs"]
+    learn_rate = args["learn_rate"]
+    k_folds = args["k_folds"]
+
+    print_model_params(n_hidden, n_epochs, learn_rate, k_folds)
+    if k_folds is None:
+        print("\nTraining with same data set for train/test...")
+        _ = test(data, n_hidden=n_hidden, n_epochs=n_epochs,
+                 learn_rate=learn_rate)
+    else:
+        print("\nTraining with {}-fold cross validation...".format(k_folds))
+        _ = k_fold_cross_val(data, k=k_folds, n_hidden=n_hidden,
+                             n_epochs=n_epochs, learn_rate=learn_rate)
