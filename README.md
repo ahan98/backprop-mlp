@@ -1,4 +1,4 @@
-# backprop-simple
+# backprop-mlp
 
 A simple implementation of backpropagation for a multilayer perceptron network with (at most) one hidden layer and discrete-valued inputs.
 
