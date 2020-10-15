@@ -111,17 +111,22 @@ def _backprop(x, target, w_out, b_out, w_h=None, b_h=None):
     # for output layer, since there are no more layers to consider.
     sigma_h, sigma_out = forward(x, w_out, b_out, w_h, b_h)
 
-    # ∂L/∂b_out = ∂L/∂sigma_out * ∂sigma_out/∂out * ∂out/∂w_out
-    # Notice ∂out/∂w_out is just the one vector since coefficient of b_h
-    # in [out = w_h @ x + b_h] is 1.
-    # Therefore, ∂L/∂b_out = ∂L/∂sigma_out * ∂sigma_out/∂out = ∂L/∂out
+    # Backprop sigma_out = sigmoid(out) = sigmoid(w_out @ sigma_h + b_out).
+    # We denote the loss function by L.
+
+    # ∂L/∂b_out = ∂L/∂sigma_out * ∂sigma_out/∂out * ∂out/∂b_out
+    # Notice ∂out/∂b_out is the one vector since coefficient of b_out is 1.
+    # Therefore, ∂L/∂b_out = ∂L/∂sigma_out * ∂sigma_out/∂out = ∂L/∂out.
     db_out = (target - sigma_out) * sigma_out * (1 - sigma_out)  # K x 1
 
     # ∂L/∂w_out = ∂L/∂out * ∂out/∂w_out
     dw_out = db_out @ sigma_h.reshape(1, -1)    # K x H
 
     if (w_h is None):
-        return dw_out, db_out, None, None
+        return (dw_out, db_out, None, None)
+
+    # Backprop sigma_h = sigmoid(h) = sigmoid(w_h @ x + b_h).
+    # This is only necessary if there is a hidden layer.
 
     # ∂L/∂sigma_h = ∂L/∂out * ∂out/∂sigma_h
     # Note: Mitchell refers to this partial as ∂net_k.
