@@ -78,9 +78,8 @@ def test(train_data, test_data=None, n_hidden=None, learn_rate=0.1,
     - returns test accuracy and trained weights/biases
     """
 
-    # test data re-uses train data, if unspecified
     if test_data is None:
-        test_data = train_data
+        test_data = train_data  # use same dataset for train/test
 
     # classify test data using trained weights/biases
     w_out, b_out, w_h, b_h = train(train_data, n_hidden, learn_rate, n_epochs)
@@ -106,8 +105,8 @@ if __name__ == "__main__":
     n_epochs = args["epochs"]
     learn_rate = args["learn_rate"]
     k_folds = args["k_folds"]
-
     print_model_params(n_hidden, n_epochs, learn_rate, k_folds)
+
     if k_folds is None:
         print("\nTraining with same data set for train/test...")
         _ = test(data, n_hidden=n_hidden, n_epochs=n_epochs,
