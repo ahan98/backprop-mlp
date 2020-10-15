@@ -70,10 +70,10 @@ def forward(x, w_out, b_out, w_h=None, b_h=None):
 
     INPUTS:
     - x (ndarray): input feature vector (shape: H x 1)
-    - w_h (ndarray): hidden layer weights (shape: H x N)
-    - b_h (ndarray): hidden layer biases (shape: H x 1)
     - w_out (ndarray): output layer weights (shape: K x H)
     - b_out (ndarray): output layer biases (shape: K x 1)
+    - w_h (ndarray): hidden layer weights (shape: H x N)
+    - b_h (ndarray): hidden layer biases (shape: H x 1)
 
     OUTPUTS:
     - sigma_h, sigma_out: respective outputs for hidden/output layers
