@@ -1,6 +1,7 @@
 # backprop-mlp
 
-A simple implementation of backpropagation for a multilayer perceptron network with (at most) one hidden layer and discrete-valued inputs.
+An implementation of backpropagation for a multilayer perceptron network with
+(at most) one hidden layer. Note that data must be discrete-valued.
 
 Completed as coursework for Williams College CSCI 374: Machine Learning.
 
